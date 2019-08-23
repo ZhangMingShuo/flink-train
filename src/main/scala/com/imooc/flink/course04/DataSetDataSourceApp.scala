@@ -6,7 +6,8 @@ object DataSetDataSourceApp {
   def main(args: Array[String]): Unit = {
     val env = ExecutionEnvironment.getExecutionEnvironment
     //fromCollection(env)
-    textFile(env)
+    //textFile(env)
+    csvFile(env)
   }
   def fromCollection(env:ExecutionEnvironment):Unit={
     import org.apache.flink.api.scala._
@@ -20,5 +21,16 @@ object DataSetDataSourceApp {
       val filePath = "E:\\IdeaProjects\\imooc-workspace\\flink-train\\src\\test\\inputs"
           env.readTextFile(filePath)
             .print()
+  }
+
+  /**
+    * 读取csv文件的内容,并读取第一列和第三列的值name，job
+    * @param env
+    */
+  def csvFile(env:ExecutionEnvironment):Unit = {
+      import org.apache.flink.api.scala._
+      val filePath = "E:\\IdeaProjects\\imooc-workspace\\flink-train\\src\\test\\inputs\\people.csv"
+      env.readCsvFile[(String,String)](filePath,includedFields=Array(0,2),ignoreFirstLine=true)
+      .print()
   }
 }

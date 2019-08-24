@@ -1,7 +1,9 @@
 package com.imooc.flink.course04
 
-import org.apache.flink.api.scala.ExecutionEnvironment
+import org.apache.flink.api.scala._
 import org.apache.flink.configuration.Configuration
+
+import scala.collection.mutable.ListBuffer
 
 object DataSetDataSourceApp {
   def main(args: Array[String]): Unit = {
@@ -11,7 +13,8 @@ object DataSetDataSourceApp {
     //csvFile(env)
     //csvFileToPojo(env)
     //readRecursiveFiles(env)
-    readCompressionFiles(env)
+    //readCompressionFiles(env)
+    mapPartitionFunction(env)
   }
   def fromCollection(env:ExecutionEnvironment):Unit={
     import org.apache.flink.api.scala._
@@ -67,5 +70,32 @@ object DataSetDataSourceApp {
     val filePath="src/test/inputs/compression/gz"
     executionEnvironment.readTextFile(filePath)
       .print()
+  }
+
+  /**
+    * mapPartition,把一百个学生存入数据库 data.mapPartition {in => in map{(_,1)}}
+    * 为了提高与数据库传递数据的性能，使用mapPartitionFunction
+    */
+  def mapPartitionFunction(executionEnvironment: ExecutionEnvironment):Unit={
+    val students = new ListBuffer[String]
+    for(i<-1 to 100)
+      students.append("student: "+i)
+    val data = executionEnvironment.fromCollection(students)
+        .setParallelism(4)
+//    data.map(x=>{
+//      val connection = DBUtils.getConnection()
+//      println(connection+"...")
+//      //TODO... 保存数据到DB
+//      DBUtils.returnConnection(connection)
+//    }).print()
+
+    data.mapPartition(x => {
+      val connection = DBUtils.getConnection()
+      println(connection+"....")
+      DBUtils.returnConnection(connection)
+      x
+    }).print()
+
+
   }
 }

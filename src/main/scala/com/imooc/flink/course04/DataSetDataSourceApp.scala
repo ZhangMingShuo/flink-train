@@ -10,7 +10,8 @@ object DataSetDataSourceApp {
     //textFile(env)
     //csvFile(env)
     //csvFileToPojo(env)
-    readRecursiveFiles(env)
+    //readRecursiveFiles(env)
+    readCompressionFiles(env)
   }
   def fromCollection(env:ExecutionEnvironment):Unit={
     import org.apache.flink.api.scala._
@@ -58,6 +59,13 @@ object DataSetDataSourceApp {
     val parameters = new Configuration
     parameters.setBoolean("recursive.file.enumeration",true)//默认的配置
     executionEnvironment.readTextFile(filePath).withParameters(parameters)
+      .print()
+  }
+
+  //flink1.8好像只支持读取gz文件
+  def readCompressionFiles(executionEnvironment: ExecutionEnvironment):Unit={
+    val filePath="src/test/inputs/compression/gz"
+    executionEnvironment.readTextFile(filePath)
       .print()
   }
 }

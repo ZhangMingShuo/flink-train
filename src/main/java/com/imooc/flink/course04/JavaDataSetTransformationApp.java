@@ -1,5 +1,6 @@
 package com.imooc.flink.course04;
 
+import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.operators.DataSource;
@@ -31,6 +32,11 @@ public class JavaDataSetTransformationApp {
             @Override
             public Integer map(Integer value) throws Exception {
                 return value + 1;
+            }
+        }).filter(new FilterFunction<Integer>() {
+            @Override
+            public boolean filter(Integer value) throws Exception {
+                return value > 5;
             }
         }).print();
     }

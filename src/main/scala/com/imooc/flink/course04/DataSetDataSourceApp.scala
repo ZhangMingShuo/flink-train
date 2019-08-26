@@ -32,7 +32,7 @@ object DataSetDataSourceApp {
   case class MyNameAgeClass(name:String,age:Int)
   /**
     * 读取csv文件的内容,并读取第一列和第三列的值name，job
-    * @param env
+    * @param env 执行环境
     */
   def csvFile(env:ExecutionEnvironment):Unit = {
       import org.apache.flink.api.scala._
@@ -55,7 +55,7 @@ object DataSetDataSourceApp {
 
   /**
     * 递归地读取文件夹中的文件的数据
-    * @param executionEnvironment
+    * @param executionEnvironment 执行环境
     */
   def readRecursiveFiles(executionEnvironment: ExecutionEnvironment):Unit={
     val filePath="src/test/nested"
@@ -95,7 +95,5 @@ object DataSetDataSourceApp {
       DBUtils.returnConnection(connection)
       x
     }).print()
-
-
   }
 }

@@ -1,23 +1,87 @@
 package com.imooc.flink.course04;
-
 import org.apache.flink.api.common.functions.FilterFunction;
+import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.MapPartitionFunction;
+import org.apache.flink.api.common.operators.Order;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.operators.DataSource;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.util.Collector;
 
 import java.util.ArrayList;
 import java.util.List;
-
 public class JavaDataSetTransformationApp {
     public static void main(String[] args) throws Exception {
         ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
-        //mapFunction(env);
+        mapFunction(env);
         mapPartitionFunction(env);
+        firstFunction(env);
+        flatMapFunction(env);
+        distinctFunction(env);
+        //joinFunction(env);
     }
-    public static void mapFunction(ExecutionEnvironment env) throws Exception {
-        List<Integer> list = new ArrayList<Integer>();
+
+    private static void distinctFunction(ExecutionEnvironment env) throws Exception {
+        List<String>info = new ArrayList<>();
+        info.add("hadoop,spark");
+        info.add("hadoop,flink");
+        info.add("flink,flink");
+        DataSource<String> data = env.fromCollection(info);
+        data.flatMap((FlatMapFunction<String, String>) (value, out) -> {
+            String[]splits = value.split(",");
+            for (String split :
+                    splits) {
+                out.collect(split);
+            }
+        }).distinct()
+                .print();
+    }
+
+    private static void flatMapFunction(ExecutionEnvironment env) throws Exception {
+        List<String>info = new ArrayList<>();
+        info.add("hadoop,spark");
+        info.add("hadoop,flink");
+        info.add("flink,flink");
+        DataSource<String> data = env.fromCollection(info);
+        data.flatMap(new FlatMapFunction<String, String>() {
+            @Override
+            public void flatMap(String value, Collector<String> out) {
+                String[]splits = value.split(",");
+                for (String split:splits
+                     ) {
+                    out.collect(split);
+                }
+            }
+        }).map(new MapFunction<String, Tuple2<String,Integer>>() {
+            @Override
+            public Tuple2<String, Integer> map(String value) {
+                return new Tuple2<>(value,1);
+            }
+        }).groupBy(0)
+                .sum(1)
+                .print();
+
+    }
+
+    private static void firstFunction(ExecutionEnvironment env) throws Exception {
+        List<Tuple2<Integer,String>>info = new ArrayList<>();
+        info.add(new Tuple2<>(1,"Hadoop"));
+        info.add(new Tuple2<>(1,"Spark"));
+        info.add(new Tuple2<>(1,"Flink"));
+        info.add(new Tuple2<>(2,"Java"));
+        info.add(new Tuple2<>(2,"Spring Boot"));
+        info.add(new Tuple2<>(3,"Linux"));
+        info.add(new Tuple2<>(4,"VUE"));
+        DataSource<Tuple2<Integer, String>> tuple2DataSource = env.fromCollection(info);
+        tuple2DataSource
+                .groupBy(0).sortGroup(1, Order.ASCENDING)
+                .first(2)
+                .print();
+    }
+
+    private static void mapFunction(ExecutionEnvironment env) throws Exception {
+        List<Integer> list = new ArrayList<>();
         for (int i = 1; i <= 10 ; i++) {
             list.add(i);
         }
@@ -29,16 +93,14 @@ public class JavaDataSetTransformationApp {
              *
              * @param value The input value.
              * @return The transformed value
-             * @throws Exception This method may throw exceptions. Throwing an exception will cause the operation
-             *                   to fail and may trigger recovery.
              */
             @Override
-            public Integer map(Integer value) throws Exception {
+            public Integer map(Integer value) {
                 return value + 1;
             }
         }).filter(new FilterFunction<Integer>() {
             @Override
-            public boolean filter(Integer value) throws Exception {
+            public boolean filter(Integer value) {
                 return value > 5;
             }
         }).print();
@@ -46,9 +108,9 @@ public class JavaDataSetTransformationApp {
 
     /**
      * mapPartitionFunction
-     * @param env
+     * @param env 执行环境
      */
-    public static void mapPartitionFunction(ExecutionEnvironment env) throws Exception {
+    private static void mapPartitionFunction(ExecutionEnvironment env) throws Exception {
         List<String>list = new ArrayList<>();
         for (int i = 1; i < 101; i++) {
             list.add("student"+i);
@@ -64,12 +126,11 @@ public class JavaDataSetTransformationApp {
 //        }).print();
         data.mapPartition(new MapPartitionFunction<String, String>() {
             @Override
-            public void mapPartition(Iterable<String> values, Collector<String> out) throws Exception {
+            public void mapPartition(Iterable<String> values, Collector<String> out) {
                 String connection = DBUtils.getConnection();
                 System.out.println("connection = [" + connection + "]");
                 DBUtils.returnConnection(connection);
             }
         }).print();
-        
     }
 }

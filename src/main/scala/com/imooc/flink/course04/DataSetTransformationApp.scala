@@ -7,11 +7,63 @@ import scala.collection.mutable.ListBuffer
 
 object DataSetTransformationApp {
 
+  def flatMapFunction(env: ExecutionEnvironment): Unit = {
+    val info = ListBuffer[String]()
+    info.append("hadoop,spark")
+    info.append("hadoop,flink")
+    info.append("flink,flink")
+    val data = env.fromCollection(info)
+//    data.flatMap(_.split(","))
+//      .print()
+    /**
+      * word count
+      */
+    data.flatMap(_.split(","))
+      .map((_,1))
+      .groupBy(0)
+      .sum(1)
+      .print()
+  }
+
+  def distinctFunction(env: ExecutionEnvironment): Unit = {
+    val info = ListBuffer[String]()
+    info.append("hadoop,spark")
+    info.append("hadoop,flink")
+    info.append("flink,flink")
+    val data = env.fromCollection(info)
+    data.flatMap(_.split(","))
+      .distinct()
+      .print()
+  }
+
   def main(args: Array[String]): Unit = {
     val env = ExecutionEnvironment.getExecutionEnvironment
     //mapFunction(env)
     //filterFunction(env)
-    firstFunction(env)
+    //firstFunction(env)
+    //useFirst(env)
+    //flatMapFunction(env)
+    //distinctFunction(env)
+    joinFunction(env)
+  }
+
+  def joinFunction(env: ExecutionEnvironment): Unit = {
+    val info1 = ListBuffer[(Int,String)]()
+    info1.append((1,"PK哥"))
+    info1.append((2,"J哥"))
+    info1.append((3,"小队长"))
+    info1.append((4,"猪头呼"))
+    val info2 = ListBuffer[(Int,String)]()
+    info2.append((1,"北京"))
+    info2.append((2,"上海"))
+    info2.append((3,"成都"))
+    info2.append((5,"杭州"))
+    val data1 = env.fromCollection(info1)
+    val data2 = env.fromCollection(info2)
+    data1.join(data2).where(0).equalTo(0)
+      .apply((first,second)=>
+        (first._1,first._2,second._2)
+      ).print()
   }
 
   def mapFunction(executionEnvironment: ExecutionEnvironment):Unit={
@@ -29,7 +81,6 @@ object DataSetTransformationApp {
     data.map(x=>x+1)
       .print()
      */
-
     data.map(_+1)
       .print()
   }
@@ -47,7 +98,7 @@ object DataSetTransformationApp {
       .print()
   }
 
-  def firstFunction(executionEnvironment: ExecutionEnvironment)={
+  def firstFunction(executionEnvironment: ExecutionEnvironment):Unit={
     val info = ListBuffer[(Int,String)]()
     info.append((1,"Hadoop"))
     info.append((1,"Spark"))
@@ -58,14 +109,14 @@ object DataSetTransformationApp {
     info.append((4,"VUE"))
     val data = executionEnvironment.fromCollection(info)
     //取前4个
-    data.first(4).print()
+    //data.first(4).print()
     /**
       * (1,Hadoop)
       * (1,Spark)
       * (1,Flink)
       * (2,Java)
       */
-    data.groupBy(0).first(2).print()
+    //data.groupBy(0).first(2).print()
     /**
       * (3,Linux)
       * (1,Hadoop)
@@ -74,7 +125,7 @@ object DataSetTransformationApp {
       * (2,Spring Boot)
       * (4,VUE)
       */
-    data.groupBy(0).sortGroup(1,Order.ASCENDING).first(2).print()
+    //data.groupBy(0).sortGroup(1,Order.ASCENDING).first(2).print()
     /**
       * (3,Linux)
       * (1,Flink)
@@ -83,7 +134,26 @@ object DataSetTransformationApp {
       * (2,Spring Boot)
       * (4,VUE)
       */
-    data.groupBy(0).sortGroup(1,Order.DESCENDING).first(2).print()
+    data.groupBy(0)
+      .sortGroup(1,Order.DESCENDING)
+      .first(2)
+      .print()
 
+  }
+
+  def useFirst(executionEnvironment: ExecutionEnvironment):Unit={
+    val info = ListBuffer[(Int,String)]()
+    info.append((1,"Hadoop"))
+    info.append((1,"Spark"))
+    info.append((1,"Selenium"))
+    info.append((1,"Flink"))
+    info.append((2,"Java"))
+    info.append((2,"Spring Boot"))
+    info.append((3,"Linux"))
+    info.append((4,"VUE"))
+    executionEnvironment.fromCollection(info)
+      .groupBy(0).sortGroup(1,Order.ASCENDING)
+      .first(3)
+      .print()
   }
 }

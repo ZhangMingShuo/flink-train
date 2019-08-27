@@ -90,7 +90,16 @@ object DataSetTransformationApp {
     //joinFunction(env)
     //leftOuterJoinFunction(env)
     //rightOutFunction(env)
-    fullOuterJoin(env)
+    //fullOuterJoin(env)
+    crossFunction(env)
+  }
+
+  def crossFunction(env: ExecutionEnvironment): Unit = {
+    val info1 = List("曼联","曼城")//两支球队
+    val info2 = List(3,1,0)//得分情况
+    val data1 = env.fromCollection(info1)
+    val data2 = env.fromCollection(info2)
+    data1.cross(data2).print() //笛卡尔积 求组合情况
   }
 
   def fullOuterJoin(env: ExecutionEnvironment): Unit = {

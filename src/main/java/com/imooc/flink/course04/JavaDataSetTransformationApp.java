@@ -14,12 +14,26 @@ import java.util.List;
 public class JavaDataSetTransformationApp {
     public static void main(String[] args) throws Exception {
         ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
-        mapFunction(env);
-        mapPartitionFunction(env);
-        firstFunction(env);
-        flatMapFunction(env);
-        distinctFunction(env);
+//        mapFunction(env);
+//        mapPartitionFunction(env);
+//        firstFunction(env);
+          flatMapFunction(env);
+//        distinctFunction(env);
         //joinFunction(env);
+        crossFunction(env);
+    }
+
+    private static void crossFunction(ExecutionEnvironment env) throws Exception {
+        List<String>info1 = new ArrayList<>();
+        info1.add("曼联");
+        info1.add("曼城");
+        List<String>info2 = new ArrayList<>();
+        info2.add("3");
+        info2.add("1");
+        info2.add("0");
+        DataSource<String> data1 = env.fromCollection(info1);
+        DataSource<String> data2 = env.fromCollection(info2);
+        data1.cross(data2).print();
     }
 
     private static void distinctFunction(ExecutionEnvironment env) throws Exception {

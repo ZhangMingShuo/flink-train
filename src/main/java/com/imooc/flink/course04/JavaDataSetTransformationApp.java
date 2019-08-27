@@ -14,13 +14,13 @@ import java.util.List;
 public class JavaDataSetTransformationApp {
     public static void main(String[] args) throws Exception {
         ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
-//        mapFunction(env);
-//        mapPartitionFunction(env);
+          //mapFunction(env);
+            //mapPartitionFunction(env);
 //        firstFunction(env);
           flatMapFunction(env);
 //        distinctFunction(env);
         //joinFunction(env);
-        crossFunction(env);
+        //crossFunction(env);
     }
 
     private static void crossFunction(ExecutionEnvironment env) throws Exception {
@@ -52,6 +52,19 @@ public class JavaDataSetTransformationApp {
                 .print();
     }
 
+    /**
+     * 用flatMapFunction做词频统计。
+     * input:
+     *  hadoop,spark
+     *  hadoop,flink
+     *  flink,flink
+     * output:
+     *  (hadoop,2)
+     *  (flink,3)
+     *  (spark,1)
+     * @param env 执行环境
+     * @throws Exception
+     */
     private static void flatMapFunction(ExecutionEnvironment env) throws Exception {
         List<String>info = new ArrayList<>();
         info.add("hadoop,spark");
@@ -94,6 +107,18 @@ public class JavaDataSetTransformationApp {
                 .print();
     }
 
+    /**
+     *
+     * 结果:
+     * 6
+     * 7
+     * 8
+     * 9
+     * 10
+     * 11
+     * @param env 执行环境
+     * @throws Exception
+     */
     private static void mapFunction(ExecutionEnvironment env) throws Exception {
         List<Integer> list = new ArrayList<>();
         for (int i = 1; i <= 10 ; i++) {
@@ -101,13 +126,6 @@ public class JavaDataSetTransformationApp {
         }
         DataSource<Integer> data = env.fromCollection(list);
         data.map(new MapFunction<Integer, Integer>() {
-            /**
-             * The mapping method. Takes an element from the input data set and transforms
-             * it into exactly one element.
-             *
-             * @param value The input value.
-             * @return The transformed value
-             */
             @Override
             public Integer map(Integer value) {
                 return value + 1;

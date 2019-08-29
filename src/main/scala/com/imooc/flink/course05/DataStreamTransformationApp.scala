@@ -6,7 +6,8 @@ object DataStreamTransformationApp {
 
   def main(args: Array[String]): Unit = {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
-    filterFunction(env)
+    //filterFunction(env)
+    unionFunction(env)
     env.execute("DataStreamTransformationApp")
   }
 
@@ -17,5 +18,9 @@ object DataStreamTransformationApp {
       x})
       .filter(_%2==0).print().setParallelism(1)
   }
-
+  def unionFunction(env: StreamExecutionEnvironment):Unit = {
+    val data1 = env.addSource(new JavaCustomNonParallelSourceFunction)
+    val data2 = env.addSource(new JavaCustomNonParallelSourceFunction)
+    data1.union(data2).print().setParallelism(1)
+  }
 }

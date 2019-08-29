@@ -8,9 +8,18 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 public class JavaDataStreamTransformationApp {
     public static void main(String[] args) throws Exception{
         StreamExecutionEnvironment env= StreamExecutionEnvironment.getExecutionEnvironment();
-        filterFunction(env);
+        //filterFunction(env);
+        unionFunction(env);
         env. execute("JavaDataStreamTrans formationApp");
     }
+
+    private static void unionFunction(StreamExecutionEnvironment env) {
+        DataStreamSource<Long>data1 = env.addSource(new JavaCustomNonParallelSourceFunction());
+        DataStreamSource<Long>data2 = env.addSource(new JavaCustomNonParallelSourceFunction());
+        data1.union(data2).print().setParallelism(1);
+
+    }
+
     public static void filterFunction(StreamExecutionEnvironment env){
         DataStreamSource<Long> data=env.addSource(new JavaCustomNonParallelSourceFunction());
         data. map(new MapFunction<Long, Long>() {

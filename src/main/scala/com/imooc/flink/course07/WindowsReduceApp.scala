@@ -9,7 +9,7 @@ object WindowReduceApp {
       .map(x=>(1,x.toInt))
       .keyBy(0)
       .timeWindow(Time.seconds(5))
-      .reduce((v1,v2)=>{
+      .reduce((v1,v2)=>{  //不是等待窗口所有数据一次性处理，而是
         println(v1 + " ... " + v2)
         (v1._1,v1._2 + v2._2)})
       .print()
